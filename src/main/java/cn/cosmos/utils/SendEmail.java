@@ -35,9 +35,9 @@ public class SendEmail {
     // 收件人邮箱号
     private static String to = "cosmosray@aliyun.com";
     // 附件地址
-    private String affix = "";
+    private String affix = "E:\\pdftest\\12345.xml";
     // 附件名称
-    private String affixName = "";
+    private String affixName = "12345.xml";
     // 用户名
     private static String user = "LeiYuZhou";
     // 授权码
@@ -115,7 +115,7 @@ public class SendEmail {
 
     public static void main(String[] args) {
         //先往你的本地写一个文件，这样附件就坑定存在了。
-       /* File file = new File("D:\\22.cvg");
+       /*File file = new File("E:\\pdftest\\12345.xml");
         try {
             OutputStream os = new FileOutputStream(file);
             BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(os,
@@ -128,10 +128,6 @@ public class SendEmail {
             e.printStackTrace();
         }*/
         SendEmail cn = new SendEmail();
-        // 设置发件人地址、收件人地址和邮件标题
-
-        // 设置要发送附件的位置和标题
-//        cn.setAffix("D:\\22.cvg", "22.cvg");
         // 设置smtp服务器以及邮箱的帐号和密码
         cn.send("smtp.qq.com", from, pwd);
     }

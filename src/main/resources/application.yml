@@ -1,0 +1,10 @@
+server:
+  port: 8082
+spring:
+  application:
+    name: send-email
+  mail:
+    host: smtp.exmail.qq.com
+    username: leiyuzhou@topnet.net.cn
+    password: Hig564wdv6fP8dRD
+    default-encoding: utf-8

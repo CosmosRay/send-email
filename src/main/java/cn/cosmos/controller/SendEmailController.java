@@ -1,8 +1,16 @@
 package cn.cosmos.controller;
 
+import cn.cosmos.service.SendEmailService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
+import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.Context;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -18,65 +26,51 @@ import java.io.*;
 @RestController
 public class SendEmailController {
 
-    @RequestMapping(value = "/send",method = RequestMethod.GET)
-    public void send(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        System.out.println("发送接口调用");
+    @Autowired
+    private SendEmailService sendEmailService;
+    @Autowired
+    private TemplateEngine templateEngine;
 
-        String filename =this.getClass().getClassLoader().getResource("/").getPath()+"email.text";
-        String filename1 =this.getClass().getClassLoader().getResource("/").getPath()+"count.text";
-           /*filename = filename.substring(1, filename.length());
-          filename1 = filename1.substring(1, filename1.length());*/
-        response.setContentType("application/text; charset=utf-8");
-        PrintWriter out = response.getWriter();
 
-        //判断该邮箱时候已经订阅过
-        FileReader fr=new FileReader(filename);
-        BufferedReader br=new BufferedReader(fr);
-        String line="";
-        String[] arrs=null;
-        while ((line=br.readLine())!=null) {
-            if(line.equals(request.getParameter("SendEmail").toString()+"\t")){
-                out.write("1");
-                return;
-            }
-        }
-        br.close();
-        fr.close();
-
-        FileWriter writer = new FileWriter(filename, true);
-        //writer.write(request.getParameter("SendEmail").toString()+  ";"+"/r/n");
-        writer.write(request.getParameter("SendEmail").toString()+"\t\n");
-        writer.close();
-
-        File f = new File(filename1);
-        int count = 0;
-        if (!f.exists()) {
-            writeFile(filename1, 100);
-        }
-        try {
-            BufferedReader in = new BufferedReader(new FileReader(f));
-            try {
-                count = Integer.parseInt(in.readLine())+1;
-                writeFile(filename1, count);
-                out.write(String.valueOf(count));
-            } catch (NumberFormatException e) {
-                e.printStackTrace();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+    @RequestMapping(value = "/sendText",name = "文本邮件发送", method = RequestMethod.GET)
+    @ResponseBody
+    public String sendText() {
+        return sendEmailService.sendSimpleMail("cosmosray@aliyun.com","我的主题","内容内容内容");
     }
 
-    public static void writeFile(String filename, int count) {
-
-        try {
-            PrintWriter out = new PrintWriter(new FileWriter(filename));
-            out.println(count);
-            out.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    @RequestMapping(value = "/sendHtml",name = "HTML邮件发送", method = RequestMethod.GET)
+    @ResponseBody
+    public String sendHtml() {
+        String content  = "<html><body><h3>这是一封HTML邮件</h3></body></html>";
+        return sendEmailService.sendHtmlMail("cosmosray@aliyun.com","我的主题",content);
     }
+
+    @RequestMapping(value = "/sendAttachments",name = "附件邮件发送", method = RequestMethod.GET)
+    @ResponseBody
+    public String sendAttachments() {
+        String content  = "<html><body><h3>这是一封Attachments邮件</h3></body></html>";
+        String filePath = "E:\\pdftest\\12345.xml";
+        return sendEmailService.sendAttachmentsMail("cosmosray@aliyun.com","我的主题",content,filePath);
+    }
+
+    @RequestMapping(value = "/sendInlineResource",name = "图片邮件发送", method = RequestMethod.GET)
+    @ResponseBody
+    public String sendInlineResource() {
+        String imgPath = "E:\\pdftest\\123.jpg";
+        String rscId = "new001";
+        String content  = "<html><body><h3>这是一封InlineResource邮件</h3><img src=\'cid:"+rscId+"\'></img></body></html>";
+        return sendEmailService.sendInlineResourceMail("cosmosray@aliyun.com","我的主题",content,imgPath,rscId);
+    }
+
+    @RequestMapping(value = "/sendTemplate",name = "图片邮件发送", method = RequestMethod.GET)
+    @ResponseBody
+    public String sendTemplate() {
+        Context context = new Context();
+        context.setVariable("id","006");
+
+        String emailContent = templateEngine.process("emailTemplate",context);
+
+        return sendEmailService.sendHtmlMail("cosmosray@aliyun.com","模板邮件",emailContent);
+    }
+
 }
