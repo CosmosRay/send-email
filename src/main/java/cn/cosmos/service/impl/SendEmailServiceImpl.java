@@ -1,6 +1,8 @@
 package cn.cosmos.service.impl;
 
 import cn.cosmos.service.SendEmailService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
@@ -26,6 +28,8 @@ public class SendEmailServiceImpl implements SendEmailService {
     private String from;
     @Autowired
     private JavaMailSender javaMailSender;
+
+    private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Override
     public String sendSimpleMail(String to, String subject, String content){
@@ -102,7 +106,7 @@ public class SendEmailServiceImpl implements SendEmailService {
 
             javaMailSender.send(message);
         } catch (MessagingException e) {
-            e.printStackTrace();
+            logger.error("发送邮件失败",e);
         }
         return "successInlineResource";
     }
